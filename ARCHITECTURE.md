@@ -42,14 +42,22 @@ packaging/         Flatpak, AUR, .deb (not started)
 
 - Owns the SQLite database (`~/.local/share/winclip/history.db`) and, from Phase 1.5,
   cached image files (`~/.local/share/winclip/images/`, content-hash filenames).
-- Exposes the session D-Bus service `org.winclip.Daemon`. This is the seam every
+- Exposes the session D-Bus service `org.winclip.Daemon` (interface
+  `org.winclip.Daemon1`). This is the seam every
   frontend talks to:
-  - Phase 1: `AddItem`, `GetHistory`, `DeleteItem`, `ClearHistory`, `Search(query)`.
+  - Phase 1: `AddItem`, `GetHistory`, `GetItem`, `DeleteItem`, `ClearHistory`,
+    `Search(query)`.
   - Phase 1.5: `PinItem`, `UnpinItem`, `PasteItem(id)`.
   - Signal: `HistoryChanged`.
+  - The full spec is [`common/org.winclip.Daemon1.xml`](common/org.winclip.Daemon1.xml).
 - Applies all business rules in one place so every frontend behaves the same: dedup,
   history size/age cap, and (from Phase 1.5) pinned-item protection.
-- Started on demand by a systemd `--user` unit.
+- **Owns the history limits** (max items, max age, max item size). They are D-Bus
+  properties stored in the daemon's database, so every frontend shares the same
+  settings. Frontend-specific preferences (e.g. the GNOME hotkey) stay in the frontend.
+- **Started on demand by D-Bus activation**: a D-Bus service file maps the name
+  `org.winclip.Daemon` to a systemd `--user` unit, so the first call from any frontend
+  starts the daemon. Frontends never start or stop it themselves.
 
 ### `gnome-extension` (GJS, GNOME 45+, ESM)
 
@@ -60,6 +68,46 @@ packaging/         Flatpak, AUR, .deb (not started)
   there is no universal standard for the hint.
 - Registers the hotkey (default `Super+V`) and renders the overlay as Shell UI.
 - Phase 1 selection only puts the item back on the clipboard; the user presses Ctrl+V.
+
+## Security model
+
+*This section describes the design. The daemon is being implemented in Phase 1; each
+guarantee below is covered by a test once its code lands.*
+
+**Who can read the history?**
+
+- **Other user accounts:** no. The database and its folder are readable only by their
+  owner (permissions `0600` / `0700`).
+- **Sandboxed apps (Flatpak, Snap):** no, unless the app has access to the session bus
+  name `org.winclip.Daemon` or to `~/.local/share/winclip/`. Note that some Flatpaks
+  request full home-folder access (`--filesystem=home` or `host`) when installed; those
+  can read the database file without the user being asked about it specifically.
+- **Unsandboxed programs running as the same user:** yes. They can call the daemon over
+  D-Bus or read the database file directly.
+
+The last point is a limit of desktop Linux, not something WinClip can fix: there is no
+security boundary between unsandboxed programs running as the same user. They can read
+each other's files and settings, so any secret used to authenticate the extension (a
+token, a key) could be read the same way. For this reason the daemon does **not**
+authenticate its callers in Phase 1. It does validate every input, since any of these
+programs can call it.
+
+One consequence worth knowing: unsandboxed programs can already read the *current*
+clipboard on GNOME Wayland, even from the background (e.g. through XWayland with
+`xclip`, or `wl-paste`, which briefly creates its own surface to read it; both verified
+on GNOME 46). What a clipboard history adds is access to *past* clipboard contents,
+which would otherwise be gone once replaced.
+
+**What protects sensitive data today:**
+
+- Items marked by password managers as sensitive are dropped by the frontend at capture
+  time and never reach the daemon or disk. This is best-effort; see the README.
+- History limits (count, age, size) bound how much is kept.
+
+**Planned (Phase 4):** encryption of the database at rest, auto-expiry, a per-app
+exclusion list, and an optional caller check (the daemon asks D-Bus for the caller's
+process and only accepts known frontends, such as `gnome-shell`). These raise the bar
+against casual snooping; they don't stop a determined program running as the same user.
 
 ## Rules of thumb for contributors
 

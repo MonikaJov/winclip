@@ -16,6 +16,11 @@ There is no universal standard for that hint, so this is **best-effort, not a
 guarantee**. Don't rely on it for high-stakes secrets until stronger protections
 (encryption at rest, auto-expiry, per-app exclusions) land.
 
+Your history is private from other user accounts and from most sandboxed (Flatpak/Snap)
+apps, but **any regular program running as you can read it**, as can sandboxed apps that
+were given access to your home folder. See the security model in
+[ARCHITECTURE.md](ARCHITECTURE.md#security-model) for details.
+
 ## License
 
 [GPL-3.0-or-later](LICENSE).
