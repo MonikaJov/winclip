@@ -1,0 +1,7 @@
+{
+  "uuid": "winclip@monikajov.github.io",
+  "name": "WinClip",
+  "description": "Clipboard history with a Win+V style overlay.",
+  "shell-version": ["45", "46", "47", "48", "49"],
+  "url": "https://github.com/MonikaJov/winclip"
+}

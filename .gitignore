@@ -1,0 +1,6 @@
+/daemon/target/
+node_modules/
+*.zip
+.vscode/
+.idea/
+CLAUDE.md

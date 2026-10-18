@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  daemon:
+    name: Daemon (Rust)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: daemon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: daemon
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+
+  extension:
+    name: GNOME extension (GJS)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gnome-extension
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: gnome-extension/package-lock.json
+      - name: Validate metadata.json
+        run: jq -e '.uuid and .name and ."shell-version"' metadata.json
+      - run: npm ci
+      - run: npm run lint
