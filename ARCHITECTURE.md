@@ -13,7 +13,7 @@ read the clipboard and own a global hotkey.**
   Hyprland, etc.). A plain background daemon therefore cannot passively watch the
   clipboard on GNOME Wayland the way it could on X11 or a wlroots compositor.
 - A **GNOME Shell extension** (GJS, loaded in-process by `gnome-shell`) has access to
-  `St.Clipboard` and can poll it directly. This is how existing tools such as
+  `St.Clipboard` and Mutter's selection API directly. This is how existing tools such as
   Clipboard Indicator work.
 - The same privileged position lets the extension register a real global keybinding
   (`Main.wm.addKeybinding`, user-remappable in GNOME Settings) and inject synthetic
@@ -61,7 +61,9 @@ packaging/         Flatpak, AUR, .deb (not started)
 
 ### `gnome-extension` (GJS, GNOME 45+, ESM)
 
-- Polls `St.Clipboard` every ~500 ms–1 s (there is no clipboard-changed signal).
+- Listens to Mutter's `Meta.Selection` `owner-changed` signal, which fires on every copy,
+  then reads the content through `Meta.Selection.transfer_async`, capped at 10 MB per
+  format so a huge copy can't stall GNOME Shell. No polling.
 - Reads `text/plain` and `text/html` (Phase 1), forwards new items to the daemon.
 - Drops anything carrying a password-manager hint (e.g.
   `x-kde-passwordManagerHint`) **before** it reaches the daemon. This is best-effort:
