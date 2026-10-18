@@ -29,9 +29,12 @@
 
   Errors (D-Bus error names):
   - org.winclip.Daemon1.Error.NotFound         no item with that ID
-  - org.winclip.Daemon1.Error.InvalidArgument  empty text, or a property value outside
-                                              its allowed range
+  - org.winclip.Daemon1.Error.InvalidArgument  empty text
   - org.winclip.Daemon1.Error.TooLarge         item exceeds MaxItemBytes
+  - org.winclip.Daemon1.Error.Failed           internal error, e.g. the database file
+                                              can't be read
+  Setting a property to an invalid value fails with the standard
+  org.freedesktop.DBus.Error.InvalidArgs instead.
 
   Validation: the daemon is reachable by any program running as the user, so it
   validates every input itself and never trusts a frontend to have done so.
@@ -92,7 +95,7 @@
     <!--
       History limits. Owned and persisted by the daemon; changes apply immediately (the
       history is trimmed right away) and emit org.freedesktop.DBus.Properties.PropertiesChanged.
-      Setting a value outside its allowed range fails with InvalidArgument and changes nothing.
+      Setting a value outside its allowed range fails with InvalidArgs and changes nothing.
     -->
 
     <!-- Maximum number of stored items; oldest are removed first.
