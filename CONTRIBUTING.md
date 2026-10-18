@@ -26,6 +26,12 @@ cargo clippy --all-targets -- -D warnings
 cargo test
 ```
 
+Code style is enforced by the tools above: the 2024 edition, `cargo fmt`, clippy's
+`pedantic` lints, and no `unsafe` code (see the `[lints]` section in
+`daemon/Cargo.toml`). CI fails on any warning. Beyond that: avoid `as` for number
+conversions (use `From`/`TryFrom`), don't `unwrap()` outside tests, and comment only
+to explain *why*, not *what* the code does.
+
 ### GNOME extension (GJS)
 
 Requires GNOME Shell 45+ and Node.js 18+ (for linting only).
