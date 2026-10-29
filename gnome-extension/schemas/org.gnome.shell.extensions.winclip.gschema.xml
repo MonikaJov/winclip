@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<schemalist>
+  <schema id="org.gnome.shell.extensions.winclip" path="/org/gnome/shell/extensions/winclip/">
+    <key name="toggle-history" type="as">
+      <default><![CDATA[['<Super>v']]]></default>
+      <summary>Show the clipboard history</summary>
+    </key>
+    <key name="freed-shortcuts" type="as">
+      <default>[]</default>
+      <summary>Shortcuts removed from GNOME's notification list, given back on disable</summary>
+    </key>
+  </schema>
+</schemalist>

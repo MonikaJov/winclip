@@ -1,5 +1,6 @@
 /daemon/target/
 node_modules/
+gschemas.compiled
 *.zip
 .vscode/
 .idea/

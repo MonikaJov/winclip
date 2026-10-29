@@ -21,21 +21,46 @@ export class DaemonClient {
     addItem(text, html) {
         if (text.includes('\0') || html.includes('\0'))
             return;
-        Gio.DBus.session.call(BUS_NAME, OBJECT_PATH, INTERFACE, 'AddItem',
-            new GLib.Variant('(ss)', [text, html]),
-            new GLib.VariantType('(t)'), Gio.DBusCallFlags.NONE, -1, this._cancellable,
-            (connection, result) => {
-                try {
-                    connection.call_finish(result);
-                    this._failing = false;
-                } catch (e) {
-                    if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED) ||
-                        Gio.DBusError.get_remote_error(e) === TOO_LARGE)
-                        return;
-                    if (!this._failing)
-                        console.warn(`WinClip: saving clipboard items failed: ${e.message}`);
-                    this._failing = true;
-                }
+        this._call('AddItem', new GLib.Variant('(ss)', [text, html]), '(t)')
+            .then(() => (this._failing = false))
+            .catch(e => {
+                if (isCancelled(e) || Gio.DBusError.get_remote_error(e) === TOO_LARGE)
+                    return;
+                if (!this._failing)
+                    console.warn(`WinClip: saving clipboard items failed: ${e.message}`);
+                this._failing = true;
             });
     }
+
+    async getHistory() {
+        const [items] = await this._call('GetHistory', new GLib.Variant('(u)', [0]), '(a(tsbx))');
+        return items.map(([id, preview, hasHtml]) => ({id, preview, hasHtml}));
+    }
+
+    async getItem(id) {
+        const [text, html] = await this._call('GetItem', new GLib.Variant('(t)', [id]), '(ss)');
+        return {text, html};
+    }
+
+    async deleteItem(id) {
+        await this._call('DeleteItem', new GLib.Variant('(t)', [id]), '()');
+    }
+
+    _call(method, args, replyType) {
+        return new Promise((resolve, reject) => {
+            Gio.DBus.session.call(BUS_NAME, OBJECT_PATH, INTERFACE, method, args,
+                new GLib.VariantType(replyType), Gio.DBusCallFlags.NONE, -1, this._cancellable,
+                (connection, result) => {
+                    try {
+                        resolve(connection.call_finish(result).deepUnpack());
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+        });
+    }
+}
+
+export function isCancelled(e) {
+    return e instanceof GLib.Error && e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED);
 }
