@@ -16,7 +16,7 @@ Copy from each app, then open the history with **Super+V**:
 | LibreOffice Writer | A paragraph | Appears |
 | Any | Text with emoji and accents (😀, é, ü) | Shown and pasted correctly |
 | Any | The same text twice | Appears once, moved to the top |
-| Terminal | `seq 1 3000000 \| xclip -selection clipboard` (~20 MB) | Not saved; desktop doesn't freeze |
+| Terminal | `seq 1 3000000 \| xclip -selection clipboard` (~20 MB; `sudo apt install xclip`) | Not saved; desktop doesn't freeze |
 | Password manager (e.g. KeePassXC) | A password | **Not** saved |
 | Browser's saved passwords | A password | Note whether it's saved (browsers may not mark passwords) |
 

@@ -13,7 +13,7 @@ Images, pinning and automatic pasting are planned.
 
 - GNOME Shell 46 (tested on Ubuntu 24.04, Wayland session)
 - [Rust](https://rustup.rs) (stable) and a C compiler (`sudo apt install build-essential`)
-- `make`
+- `make` and `glib-compile-schemas` (package `libglib2.0-bin`, included with GNOME)
 
 ## Install
 
