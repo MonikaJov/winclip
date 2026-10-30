@@ -16,6 +16,7 @@ export default class WinClipPreferences extends ExtensionPreferences {
         page.add(createShortcutGroup(this.getSettings()));
         page.add(limits.widget);
         window.add(page);
+        window.default_height = -1;
 
         window.connect('close-request', () => {
             limits.flush();
