@@ -1,9 +1,28 @@
 [package]
 name = "winclip-daemon"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "GPL-3.0-or-later"
 description = "Clipboard history storage service for WinClip"
 publish = false
 
 [dependencies]
+rusqlite = { version = "0.40.2", features = ["bundled", "fallible_uint", "functions"] }
+rusqlite_migration = "2.6.0"
+sha2 = "0.11.1"
+thiserror = "2.0.21"
+tokio = { version = "1.53.3", features = ["macros", "rt", "signal", "time"] }
+zbus = { version = "5.19", default-features = false, features = ["tokio"] }
+
+[dev-dependencies]
+futures-util = { version = "0.3.34", default-features = false }
+tempfile = "3.27.0"
+tokio = { version = "1.53.3", features = ["net"] }
+zbus = { version = "5.19", default-features = false, features = ["p2p"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+missing_errors_doc = "allow"

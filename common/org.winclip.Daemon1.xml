@@ -1,0 +1,117 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+  "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!--
+  WinClip daemon D-Bus interface.
+
+  Bus:         session bus
+  Bus name:    org.winclip.Daemon
+  Object path: /org/winclip/Daemon1
+  Interface:   org.winclip.Daemon1
+
+  The interface name and object path carry a version number. A future incompatible
+  change adds org.winclip.Daemon2 alongside it, so older frontends keep working.
+
+  Every frontend (GNOME extension, future X11 app, future KDE integration) talks to the
+  daemon only through this interface. Business rules (dedup, limits) live in the daemon.
+
+  Conventions:
+  - Item IDs are unsigned 64-bit integers (t). 0 is never a valid ID.
+  - Timestamps are Unix time in seconds, UTC (x).
+  - "No HTML" is sent and returned as an empty string, since D-Bus has no null.
+  - List results use the item summary struct (tsbx):
+      id         t  item ID
+      preview    s  first 200 Unicode characters (code points) of the plain text;
+                    the full text comes from GetItem
+      has_html   b  true if a text/html version is stored
+      copied_at  x  last time this content was copied (re-copying updates it)
+    Lists are ordered newest first.
+
+  Errors (D-Bus error names):
+  - org.winclip.Daemon1.Error.NotFound         no item with that ID
+  - org.winclip.Daemon1.Error.InvalidArgument  empty text
+  - org.winclip.Daemon1.Error.TooLarge         item exceeds MaxItemBytes
+  - org.winclip.Daemon1.Error.Failed           internal error, e.g. the database file
+                                              can't be read
+  Setting a property to an invalid value fails with the standard
+  org.freedesktop.DBus.Error.InvalidArgs instead.
+
+  Validation: the daemon is reachable by any program running as the user, so it
+  validates every input itself and never trusts a frontend to have done so.
+-->
+<node>
+  <interface name="org.winclip.Daemon1">
+
+    <!--
+      Store a new clipboard item, or, if the same plain text is already stored, move it
+      to the top (updates copied_at and replaces its HTML) and return its existing ID.
+      text must not be empty (InvalidArgument), even when html is set.
+      text + html combined, in UTF-8 bytes, must not exceed MaxItemBytes (TooLarge).
+      Emits HistoryChanged.
+    -->
+    <method name="AddItem">
+      <arg name="text" type="s" direction="in"/>
+      <arg name="html" type="s" direction="in"/>
+      <arg name="id" type="t" direction="out"/>
+    </method>
+
+    <!-- Most recent items first. limit = 0 means all stored items. -->
+    <method name="GetHistory">
+      <arg name="limit" type="u" direction="in"/>
+      <arg name="items" type="a(tsbx)" direction="out"/>
+    </method>
+
+    <!-- Full content of one item, e.g. to put it back on the clipboard. -->
+    <method name="GetItem">
+      <arg name="id" type="t" direction="in"/>
+      <arg name="text" type="s" direction="out"/>
+      <arg name="html" type="s" direction="out"/>
+    </method>
+
+    <!-- Fails with NotFound if the ID doesn't exist. Emits HistoryChanged. -->
+    <method name="DeleteItem">
+      <arg name="id" type="t" direction="in"/>
+    </method>
+
+    <!-- Delete every item. Emits HistoryChanged. -->
+    <method name="ClearHistory"/>
+
+    <!--
+      Case-insensitive substring match on the plain text. Same ordering and limit
+      semantics as GetHistory. An empty query behaves like GetHistory.
+    -->
+    <method name="Search">
+      <arg name="query" type="s" direction="in"/>
+      <arg name="limit" type="u" direction="in"/>
+      <arg name="items" type="a(tsbx)" direction="out"/>
+    </method>
+
+    <!--
+      The stored history changed (item added, moved to top, deleted, cleared, or trimmed
+      by a limit). Frontends should re-fetch with GetHistory.
+    -->
+    <signal name="HistoryChanged"/>
+
+    <!--
+      History limits. Owned and persisted by the daemon; changes apply immediately (the
+      history is trimmed right away) and emit org.freedesktop.DBus.Properties.PropertiesChanged.
+      Setting a value outside its allowed range fails with InvalidArgs and changes nothing.
+    -->
+
+    <!-- Maximum number of stored items; oldest are removed first.
+         Range 1-1000. Default 25. -->
+    <property name="MaxItems" type="u" access="readwrite"/>
+
+    <!-- Items older than this many days are removed.
+         Range 0-3650; 0 = no age limit. Default 0. -->
+    <property name="MaxAgeDays" type="u" access="readwrite"/>
+
+    <!-- Maximum size of one item (text + html, UTF-8 bytes).
+         Range 1024-10485760 (1 KB-10 MB). Default 1048576 (1 MB). -->
+    <property name="MaxItemBytes" type="u" access="readwrite"/>
+
+    <!-- Daemon version, e.g. "0.1.0", so frontends can detect a mismatch. -->
+    <property name="Version" type="s" access="read"/>
+
+  </interface>
+</node>
