@@ -34,7 +34,7 @@ to explain *why*, not *what* the code does.
 
 ### GNOME extension (GJS)
 
-Requires GNOME Shell 45+ and Node.js 18+ (for linting only).
+Requires GNOME Shell 46 and Node.js 18+ (for linting only).
 
 ```sh
 cd gnome-extension
@@ -42,17 +42,14 @@ npm ci
 npm run lint
 ```
 
-To try the extension locally, symlink it into your extensions directory and log out
-and back in (Wayland can't restart the Shell in place):
-
-```sh
-ln -s "$PWD" ~/.local/share/gnome-shell/extensions/winclip@monikajov.github.io
-gnome-extensions enable winclip@monikajov.github.io
-```
+To try your changes, run `make install` from the repository root, then log out and
+back in (Wayland can't restart the Shell in place). The preferences window is the
+exception: it loads fresh each time it opens, so reopening it is enough.
 
 For faster iteration, run a nested Shell instead of logging out:
-`dbus-run-session -- gnome-shell --nested --wayland` (GNOME 45–48) or
-`dbus-run-session -- gnome-shell --devkit` (GNOME 49+).
+`dbus-run-session -- gnome-shell --nested --wayland`.
+
+Before a release, run the [manual test checklist](docs/manual-testing.md).
 
 ## Pull requests
 

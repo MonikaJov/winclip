@@ -59,7 +59,7 @@ packaging/         Flatpak, AUR, .deb (not started)
   `org.winclip.Daemon` to a systemd `--user` unit, so the first call from any frontend
   starts the daemon. Frontends never start or stop it themselves.
 
-### `gnome-extension` (GJS, GNOME 45+, ESM)
+### `gnome-extension` (GJS, GNOME 46, ESM)
 
 - Listens to Mutter's `Meta.Selection` `owner-changed` signal, which fires on every copy,
   then reads the content through `Meta.Selection.transfer_async`, capped at 10 MB per
@@ -117,5 +117,5 @@ against casual snooping; they don't stop a determined program running as the sam
   the same rule, it belongs behind D-Bus.
 - **Sensitive content is filtered at capture time** in the frontend, so it never
   crosses the D-Bus boundary or touches disk.
-- **Target GNOME 45+ (ESM extensions)** as the floor; GNOME Shell APIs change between
+- **Target GNOME 46**, the version WinClip is tested on; GNOME Shell APIs change between
   releases, so keep `metadata.json`'s `shell-version` list to versions actually tested.
