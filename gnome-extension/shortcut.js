@@ -15,6 +15,10 @@ export class Shortcut {
         this._settings = settings;
         this._shellSettings = new Gio.Settings({schema_id: SHELL_SCHEMA});
         this._freeConflicts();
+        this._changedId = settings.connect(`changed::${KEY}`, () => {
+            this._restoreConflicts();
+            this._freeConflicts();
+        });
         const action = Main.wm.addKeybinding(KEY, settings, Meta.KeyBindingFlags.NONE,
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW, onActivate);
         if (action === Meta.KeyBindingAction.NONE)
@@ -22,6 +26,7 @@ export class Shortcut {
     }
 
     destroy() {
+        this._settings.disconnect(this._changedId);
         Main.wm.removeKeybinding(KEY);
         this._restoreConflicts();
     }

@@ -6,6 +6,7 @@ import GLib from 'gi://GLib';
 const BUS_NAME = 'org.winclip.Daemon';
 const OBJECT_PATH = '/org/winclip/Daemon1';
 const INTERFACE = 'org.winclip.Daemon1';
+const PROPERTIES_INTERFACE = 'org.freedesktop.DBus.Properties';
 const TOO_LARGE = 'org.winclip.Daemon1.Error.TooLarge';
 
 export class DaemonClient {
@@ -46,9 +47,20 @@ export class DaemonClient {
         await this._call('DeleteItem', new GLib.Variant('(t)', [id]), '()');
     }
 
-    _call(method, args, replyType) {
+    async getProperty(name) {
+        const [value] = await this._call('Get', new GLib.Variant('(ss)', [INTERFACE, name]), '(v)',
+            PROPERTIES_INTERFACE);
+        return value.unpack();
+    }
+
+    async setProperty(name, value) {
+        await this._call('Set', new GLib.Variant('(ssv)', [INTERFACE, name, value]), '()',
+            PROPERTIES_INTERFACE);
+    }
+
+    _call(method, args, replyType, iface = INTERFACE) {
         return new Promise((resolve, reject) => {
-            Gio.DBus.session.call(BUS_NAME, OBJECT_PATH, INTERFACE, method, args,
+            Gio.DBus.session.call(BUS_NAME, OBJECT_PATH, iface, method, args,
                 new GLib.VariantType(replyType), Gio.DBusCallFlags.NONE, -1, this._cancellable,
                 (connection, result) => {
                     try {

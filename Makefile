@@ -11,7 +11,7 @@ SYSTEMD_USER_DIR ?= $(XDG_CONFIG_HOME)/systemd/user
 EXTENSION_UUID := winclip@monikajov.github.io
 EXTENSION_DIR ?= $(XDG_DATA_HOME)/gnome-shell/extensions/$(EXTENSION_UUID)
 EXTENSION_FILES := metadata.json stylesheet.css extension.js clipboardWatcher.js \
-	daemonClient.js historyPopup.js shortcut.js
+	daemonClient.js historyPopup.js shortcut.js prefs.js prefsLimits.js prefsShortcut.js
 EXTENSION_SCHEMA := schemas/org.gnome.shell.extensions.winclip.gschema.xml
 
 DAEMON_BIN := daemon/target/release/winclip-daemon
