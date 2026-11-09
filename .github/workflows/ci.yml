@@ -44,3 +44,25 @@ jobs:
         run: jq -e '.uuid and .name and ."shell-version"' metadata.json
       - run: npm ci
       - run: npm run lint
+
+  package:
+    name: Packaging
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: daemon
+      - run: sudo apt-get update && sudo apt-get install -y libglib2.0-bin shellcheck
+      - run: shellcheck packaging/*.sh
+      - run: make dist
+      - name: Install from the archive and uninstall again
+        run: |
+          mkdir unpacked
+          tar -C unpacked -xzf dist/*.tar.gz
+          DESTDIR="$PWD/root" unpacked/*/install.sh
+          test -x "root$HOME/.local/bin/winclip-daemon"
+          test -f "root$HOME/.local/share/gnome-shell/extensions/winclip@monikajov.github.io/schemas/gschemas.compiled"
+          DESTDIR="$PWD/root" "root$HOME/.local/bin/winclip-uninstall"
+          test -z "$(find root -type f)"

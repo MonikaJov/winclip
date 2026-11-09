@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: rustup update stable && rustup default stable
+      - name: Check that the tag matches the version numbers
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          cargo_version=$(sed -n 's/^version = "\(.*\)"/\1/p' daemon/Cargo.toml)
+          extension_version=$(jq -r '."version-name"' gnome-extension/metadata.json)
+          test "$tag" = "$cargo_version"
+          test "$tag" = "$extension_version"
+      - run: sudo apt-get update && sudo apt-get install -y libglib2.0-bin
+      - run: cargo test --locked
+        working-directory: daemon
+      - run: make dist
+      - name: Publish the GitHub Release
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.tar.gz dist/SHA256SUMS packaging/get.sh \
+            --title "WinClip $GITHUB_REF_NAME" --notes-file CHANGELOG.md
+        env:
+          GH_TOKEN: ${{ github.token }}

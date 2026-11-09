@@ -6,5 +6,6 @@
     "46"
   ],
   "url": "https://github.com/MonikaJov/winclip",
-  "settings-schema": "org.gnome.shell.extensions.winclip"
+  "settings-schema": "org.gnome.shell.extensions.winclip",
+  "version-name": "0.1.0"
 }

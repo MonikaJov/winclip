@@ -51,6 +51,18 @@ For faster iteration, run a nested Shell instead of logging out:
 
 Before a release, run the [manual test checklist](docs/manual-testing.md).
 
+## Releasing
+
+1. Update the version in `daemon/Cargo.toml` (then run `cargo check` to update
+   `Cargo.lock`) and `version-name` in `gnome-extension/metadata.json`.
+2. Add the changes to `CHANGELOG.md`.
+3. Run the [manual test checklist](docs/manual-testing.md).
+4. After merging, tag the commit on `main` and push the tag:
+   `git tag v0.2.0 && git push origin v0.2.0`.
+
+CI then checks that the tag matches both version numbers, runs the tests, builds the
+archive and publishes the GitHub Release. Run `make dist` to build the same archive locally.
+
 ## Pull requests
 
 - Keep PRs focused; one logical change per PR.
