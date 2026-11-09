@@ -58,4 +58,4 @@ Selecting text without copying (middle-click paste) must **not** add anything.
 ## Afterwards
 
 - [ ] `journalctl --user -b -o cat /usr/bin/gnome-shell | grep -i winclip` shows no errors
-- [ ] `~/.local/bin/winclip-uninstall` removes the installed files and restores Super+V
+- [ ] `winclip-uninstall` removes the installed files and restores Super+V

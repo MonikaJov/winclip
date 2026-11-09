@@ -98,8 +98,10 @@ Lowering a limit **permanently deletes** the items that no longer fit.
 ## Uninstall
 
 ```sh
-~/.local/bin/winclip-uninstall
+winclip-uninstall
 ```
+
+If the command isn't found, run `~/.local/bin/winclip-uninstall`.
 
 This disables the extension, gives Super+V back to GNOME and removes the installed
 files. Your history stays; delete it with `rm -rf ~/.local/share/winclip`.
