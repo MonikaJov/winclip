@@ -58,7 +58,8 @@ Before a release, run the [manual test checklist](docs/manual-testing.md).
 2. Add the changes to `CHANGELOG.md`.
 3. Run the [manual test checklist](docs/manual-testing.md).
 4. After merging, tag the commit on `main` and push the tag:
-   `git tag v0.2.0 && git push origin v0.2.0`.
+   `git tag v0.2.0 && git push origin v0.2.0`. Or publish a release with a new `v0.2.0`
+   tag on GitHub's Releases page; CI then attaches the files to it.
 
 CI then checks that the tag matches both version numbers, runs the tests, builds the
 archive and publishes the GitHub Release. Run `make dist` to build the same archive locally.

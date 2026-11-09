@@ -29,7 +29,12 @@ jobs:
       - run: make dist
       - name: Publish the GitHub Release
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/*.tar.gz dist/SHA256SUMS packaging/get.sh \
-            --title "WinClip $GITHUB_REF_NAME" --notes-file CHANGELOG.md
+          set -- dist/winclip-x86_64.tar.gz dist/SHA256SUMS packaging/get.sh
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$@" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$@" \
+              --title "WinClip $GITHUB_REF_NAME" --notes-file CHANGELOG.md
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
