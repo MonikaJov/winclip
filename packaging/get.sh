@@ -20,7 +20,7 @@ main() {
     (cd "$work" && sha256sum --check --quiet SHA256SUMS)
 
     tar -xzf "$work/$archive" -C "$work"
-    "$work"/winclip-*/install.sh
+    sh "$work"/winclip-*/install.sh
 }
 
 main
