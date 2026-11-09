@@ -1,23 +1,49 @@
 # WinClip
 
-*Working title.* A lightweight clipboard history manager for Linux, inspired by Windows'
-Win+V: press **Super+V**, pick something you copied earlier, and paste it again.
+Clipboard history for Linux, like Win+V on Windows. Press **Super+V**, pick something
+you copied earlier and paste it again.
 
 **Status:** early development. Text clipboard history works on GNOME 46 (Wayland).
 Images, pinning and automatic pasting are planned.
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — why it's a GNOME Shell extension plus a daemon
-- [CONTRIBUTING.md](CONTRIBUTING.md) — dev setup and PR guidelines
+How it works: [ARCHITECTURE.md](ARCHITECTURE.md). Want to help? See
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Requirements
 
-- GNOME Shell 46 (tested on Ubuntu 24.04, Wayland session)
-- [Rust](https://rustup.rs) (stable) and a C compiler (`sudo apt install build-essential`)
-- `make` and `glib-compile-schemas` (package `libglib2.0-bin`, included with GNOME)
+GNOME Shell 46 on a 64-bit PC (tested on Ubuntu 24.04, Wayland session).
 
 ## Install
 
-Everything installs into your home folder; no `sudo` needed.
+WinClip installs into your home folder, so you don't need `sudo`.
+
+```sh
+curl -fsSL https://github.com/MonikaJov/winclip/releases/latest/download/get.sh | sh
+```
+
+Log out and back in (GNOME only picks up new extensions at login), then press Super+V.
+
+To update, run the same command again and log out and back in. Your history and
+settings stay.
+
+### Install manually
+
+If you'd rather not pipe a script into `sh`, download `winclip-x86_64.tar.gz` from the
+[Releases page](https://github.com/MonikaJov/winclip/releases), then:
+
+```sh
+tar xzf winclip-x86_64.tar.gz
+cd winclip-*/
+./install.sh
+```
+
+Then log out and back in.
+
+### Build from source
+
+You'll need [Rust](https://rustup.rs) (stable), a C compiler
+(`sudo apt install build-essential`), `make` and `glib-compile-schemas` (package
+`libglib2.0-bin`, included with GNOME).
 
 ```sh
 git clone https://github.com/MonikaJov/winclip.git
@@ -25,22 +51,18 @@ cd winclip
 make install
 ```
 
-Then **log out and back in** (GNOME only discovers new extensions at login) and enable
-the extension:
+Then log out and back in.
 
-```sh
-gnome-extensions enable winclip@monikajov.github.io
-```
-
-`make install` puts these in place:
+### What gets installed
 
 | What | Where |
 |---|---|
 | Background service (daemon) | `~/.local/bin/winclip-daemon` |
+| Uninstaller | `~/.local/bin/winclip-uninstall` |
 | Start-on-demand files | `~/.local/share/dbus-1/services/`, `~/.config/systemd/user/` |
 | GNOME extension | `~/.local/share/gnome-shell/extensions/winclip@monikajov.github.io/` |
 
-The daemon isn't added to autostart; it starts the first time the extension needs it.
+The daemon doesn't autostart. It starts the first time the extension needs it.
 
 ## Usage
 
@@ -66,7 +88,7 @@ when disabled.
 Open **Extensions** → WinClip's gear icon, or run
 `gnome-extensions prefs winclip@monikajov.github.io`.
 
-- **Shortcut** — click the row and press a new combination (must include Ctrl, Alt or
+- **Shortcut**: click the row and press a new combination (must include Ctrl, Alt or
   Super). Backspace restores Super+V.
 - **Items to keep** (default 25), **Keep items for (days)** (default 0 = no age limit),
   **Largest item (KB)** (default 1024).
@@ -76,11 +98,13 @@ Lowering a limit **permanently deletes** the items that no longer fit.
 ## Uninstall
 
 ```sh
-make uninstall
+winclip-uninstall
 ```
 
+If the command isn't found, run `~/.local/bin/winclip-uninstall`.
+
 This disables the extension, gives Super+V back to GNOME and removes the installed
-files. Your history is kept; delete it with `rm -rf ~/.local/share/winclip`.
+files. Your history stays; delete it with `rm -rf ~/.local/share/winclip`.
 
 ## A note on sensitive content
 

@@ -1,8 +1,8 @@
 # Manual testing
 
 The daemon has automated tests (`cargo test`); the GNOME extension can only be tested in a
-real session. Run this checklist before a release, on a fresh `make install` followed by
-logging out and back in.
+real session. Run this checklist before a release, on a fresh install from `make dist`'s
+archive followed by logging out and back in.
 
 ## Capture
 
@@ -58,4 +58,4 @@ Selecting text without copying (middle-click paste) must **not** add anything.
 ## Afterwards
 
 - [ ] `journalctl --user -b -o cat /usr/bin/gnome-shell | grep -i winclip` shows no errors
-- [ ] `make uninstall` removes the installed files and restores Super+V
+- [ ] `winclip-uninstall` removes the installed files and restores Super+V
